@@ -1,0 +1,415 @@
+// // This is your Prisma schema file,
+// // learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// generator client {
+//   provider = "prisma-client-js"
+// }
+
+// datasource db {
+//   provider = "postgresql"
+//   url      = env("DATABASE_URL")
+// }
+
+// model User {
+//   id        String   @id @default(uuid())
+//   email     String   @unique
+//   password  String
+//   name      String?
+//   avatar    String?
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   vaults    VaultMember[]
+//   uploads   Media[]
+//   notes     LegacyNote[]
+//   votes     Vote[]
+//   comments  Comment[]
+
+//   @@map("users")
+// }
+
+// model Vault {
+//   id          String   @id @default(uuid())
+//   name        String
+//   description String?
+//   coverImage  String?
+//   themeColor  String   @default("#3b82f6")
+//   inviteCode  String   @unique @default(cuid())
+//   inviteLink  String?
+//   createdAt   DateTime @default(now())
+//   updatedAt   DateTime @updatedAt
+
+//   members VaultMember[]
+//   media   Media[]
+//   notes   LegacyNote[]
+
+//   @@map("vaults")
+// }
+
+// model VaultMember {
+//   id      String @id @default(uuid())
+//   vaultId String
+//   userId  String
+//   role    Role   @default(MEMBER)
+
+//   vault Vault @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+//   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+//   @@unique([vaultId, userId])
+//   @@map("vault_members")
+// }
+
+// enum Role {
+//   ADMIN
+//   MEMBER
+//   READ_ONLY
+// }
+
+// model Media {
+//   id           String    @id @default(uuid())
+//   vaultId      String
+//   uploaderId   String
+//   fileUrl      String
+//   fileName     String
+//   fileSize     Int
+//   type         MediaType
+//   caption      String?
+//   aiCaption    String?
+//   approved     Boolean   @default(false)
+//   deletedAt    DateTime?
+//   createdAt    DateTime  @default(now())
+//   updatedAt    DateTime  @updatedAt
+
+//   vault    Vault     @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+//   uploader User      @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+//   votes    Vote[]
+//   comments Comment[]
+
+//   @@map("media")
+// }
+
+// enum MediaType {
+//   IMAGE
+//   AUDIO
+//   VIDEO
+// }
+
+// model Vote {
+//   id      String  @id @default(uuid())
+//   mediaId String
+//   voterId String
+//   value   Boolean
+//   reason  String?
+
+//   media Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+//   voter User  @relation(fields: [voterId], references: [id], onDelete: Cascade)
+
+//   @@unique([mediaId, voterId])
+//   @@map("votes")
+// }
+
+// model Comment {
+//   id        String   @id @default(uuid())
+//   mediaId   String
+//   authorId  String
+//   content   String
+//   createdAt DateTime @default(now())
+
+//   media  Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+//   author User  @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+//   @@map("comments")
+// }
+
+// model LegacyNote {
+//   id        String   @id @default(uuid())
+//   vaultId   String
+//   authorId  String
+//   title     String?
+//   content   String
+//   isPrivate Boolean  @default(false)
+//   deletedAt DateTime?
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   vault  Vault @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+//   author User  @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+//   @@map("legacy_notes")
+// }
+
+
+
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  avatar    String?
+  darkMode  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  vaults           VaultMember[]
+  uploads          Media[]
+  notes            LegacyNote[]
+  votes            Vote[]
+  comments         Comment[]
+  activities       VaultActivity[]
+  joinRequests     JoinRequest[]
+  mentionedIn      MediaMention[]
+  noteMentions     NoteMention[]
+
+  @@map("users")
+}
+
+model Vault {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  coverImage  String?
+  themeColor  String   @default("#3b82f6")
+  inviteCode  String   @unique @default(cuid())
+  inviteLink  String?
+  allowJoinRequests Boolean @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members      VaultMember[]
+  media        Media[]
+  notes        LegacyNote[]
+  activities   VaultActivity[]
+  joinRequests JoinRequest[]
+
+  @@map("vaults")
+}
+
+model VaultMember {
+  id      String @id @default(uuid())
+  vaultId String
+  userId  String
+  role    Role   @default(MEMBER)
+  joinedAt DateTime @default(now())
+
+  vault Vault @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([vaultId, userId])
+  @@map("vault_members")
+}
+
+model JoinRequest {
+  id        String            @id @default(uuid())
+  vaultId   String
+  userId    String
+  status    JoinRequestStatus @default(PENDING)
+  message   String?
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  vault Vault @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([vaultId, userId])
+  @@map("join_requests")
+}
+
+enum JoinRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum Role {
+  ADMIN
+  MEMBER
+  READ_ONLY
+}
+
+model Media {
+  id           String    @id @default(uuid())
+  vaultId      String
+  uploaderId   String
+  fileUrl      String
+  fileName     String
+  fileSize     Int
+  type         MediaType
+  caption      String?
+  aiCaption    String?
+  approved     Boolean   @default(false)
+  deletedAt    DateTime?
+  location     String?
+  latitude     Float?
+  longitude    Float?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  vault    Vault          @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+  uploader User           @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+  votes    Vote[]
+  comments Comment[]
+  tags     MediaTag[]
+  mentions MediaMention[]
+
+  @@map("media")
+}
+
+model MediaMention {
+  id      String @id @default(uuid())
+  mediaId String
+  userId  String
+
+  media Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([mediaId, userId])
+  @@map("media_mentions")
+}
+
+model NoteMention {
+  id     String @id @default(uuid())
+  noteId String
+  userId String
+
+  note LegacyNote @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  user User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([noteId, userId])
+  @@map("note_mentions")
+}
+
+enum MediaType {
+  IMAGE
+  AUDIO
+  VIDEO
+}
+
+model Vote {
+  id      String  @id @default(uuid())
+  mediaId String
+  voterId String
+  value   Boolean
+  reason  String?
+
+  media Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  voter User  @relation(fields: [voterId], references: [id], onDelete: Cascade)
+
+  @@unique([mediaId, voterId])
+  @@map("votes")
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  mediaId   String
+  authorId  String
+  content   String
+  createdAt DateTime @default(now())
+
+  media  Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  author User  @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@map("comments")
+}
+
+model LegacyNote {
+  id        String    @id @default(uuid())
+  vaultId   String
+  authorId  String
+  title     String?
+  content   String
+  isPrivate Boolean   @default(false)
+  location  String?
+  latitude  Float?
+  longitude Float?
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  vault    Vault         @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+  author   User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  tags     NoteTag[]
+  mentions NoteMention[]
+
+  @@map("legacy_notes")
+}
+
+model Tag {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  color     String   @default("#3b82f6")
+  createdAt DateTime @default(now())
+
+  mediaTags MediaTag[]
+  noteTags  NoteTag[]
+
+  @@map("tags")
+}
+
+model MediaTag {
+  id      String @id @default(uuid())
+  mediaId String
+  tagId   String
+
+  media Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  tag   Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([mediaId, tagId])
+  @@map("media_tags")
+}
+
+model NoteTag {
+  id     String @id @default(uuid())
+  noteId String
+  tagId  String
+
+  note LegacyNote @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  tag  Tag        @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([noteId, tagId])
+  @@map("note_tags")
+}
+
+model VaultActivity {
+  id        String       @id @default(uuid())
+  vaultId   String
+  userId    String
+  action    ActivityType
+  details   String
+  metadata  Json?
+  createdAt DateTime     @default(now())
+
+  vault Vault @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("vault_activities")
+}
+
+enum ActivityType {
+  MEDIA_UPLOADED
+  MEDIA_DELETED
+  MEDIA_RESTORED
+  VOTE_CAST
+  COMMENT_ADDED
+  NOTE_CREATED
+  NOTE_UPDATED
+  NOTE_DELETED
+  MEMBER_JOINED
+  MEMBER_LEFT
+  MEMBER_REMOVED
+  MEMBER_ROLE_CHANGED
+  VAULT_CREATED
+  VAULT_UPDATED
+  VAULT_DELETED
+}
