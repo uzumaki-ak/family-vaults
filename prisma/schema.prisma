@@ -138,8 +138,6 @@
 //   @@map("legacy_notes")
 // }
 
-
-
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
@@ -162,30 +160,30 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  vaults           VaultMember[]
-  uploads          Media[]
-  notes            LegacyNote[]
-  votes            Vote[]
-  comments         Comment[]
-  activities       VaultActivity[]
-  joinRequests     JoinRequest[]
-  mentionedIn      MediaMention[]
-  noteMentions     NoteMention[]
+  vaults       VaultMember[]
+  uploads      Media[]
+  notes        LegacyNote[]
+  votes        Vote[]
+  comments     Comment[]
+  activities   VaultActivity[]
+  joinRequests JoinRequest[]
+  mentionedIn  MediaMention[]
+  noteMentions NoteMention[]
 
   @@map("users")
 }
 
 model Vault {
-  id          String   @id @default(uuid())
-  name        String
-  description String?
-  coverImage  String?
-  themeColor  String   @default("#3b82f6")
-  inviteCode  String   @unique @default(cuid())
-  inviteLink  String?
-  allowJoinRequests Boolean @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                String   @id @default(uuid())
+  name              String
+  description       String?
+  coverImage        String?
+  themeColor        String   @default("#3b82f6")
+  inviteCode        String   @unique @default(cuid())
+  inviteLink        String?
+  allowJoinRequests Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   members      VaultMember[]
   media        Media[]
@@ -197,10 +195,10 @@ model Vault {
 }
 
 model VaultMember {
-  id      String @id @default(uuid())
-  vaultId String
-  userId  String
-  role    Role   @default(MEMBER)
+  id       String   @id @default(uuid())
+  vaultId  String
+  userId   String
+  role     Role     @default(MEMBER)
   joinedAt DateTime @default(now())
 
   vault Vault @relation(fields: [vaultId], references: [id], onDelete: Cascade)
@@ -239,22 +237,26 @@ enum Role {
 }
 
 model Media {
-  id           String    @id @default(uuid())
-  vaultId      String
-  uploaderId   String
-  fileUrl      String
-  fileName     String
-  fileSize     Int
-  type         MediaType
-  caption      String?
-  aiCaption    String?
-  approved     Boolean   @default(false)
-  deletedAt    DateTime?
-  location     String?
-  latitude     Float?
-  longitude    Float?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id         String    @id @default(uuid())
+  vaultId    String
+  uploaderId String
+  fileUrl    String
+  fileName   String
+  fileSize   Int
+  type       MediaType
+  caption    String?
+  aiCaption  String?
+  approved   Boolean   @default(false)
+  deletedAt  DateTime?
+  location   String?
+  latitude   Float?
+  longitude  Float?
+
+  unlockAt DateTime? // When null, it's a regular memory
+  isLocked Boolean   @default(false) // Helper field for easier queries
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   vault    Vault          @relation(fields: [vaultId], references: [id], onDelete: Cascade)
   uploader User           @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
@@ -334,8 +336,12 @@ model LegacyNote {
   latitude  Float?
   longitude Float?
   deletedAt DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+
+  unlockAt DateTime? // When null, it's a regular note
+  isLocked Boolean   @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   vault    Vault         @relation(fields: [vaultId], references: [id], onDelete: Cascade)
   author   User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
