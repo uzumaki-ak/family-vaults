@@ -94,6 +94,3 @@ cd family-vault
 
 # i pushed it toady but here is when i started the project : 
 
-![image](https://github.com/user-attachments/assets/ace68d30-891d-4340-b5d7-9ba4546696e0)
-
-
