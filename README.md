@@ -16,7 +16,7 @@ Built using **Next.js 15**, **TypeScript**, **Tailwind CSS**, **Supabase**, **Pr
 
 ## 🚀 Live Demo
 
-🔗 [Coming Soon](https://youtu.be/lIwSNZrEWqc)
+🔗 (https://youtu.be/lIwSNZrEWqc)
 
 ---
 
