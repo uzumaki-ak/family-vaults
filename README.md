@@ -16,7 +16,7 @@ Built using **Next.js 15**, **TypeScript**, **Tailwind CSS**, **Supabase**, **Pr
 
 ## 🚀 Live Demo
 
-🔗 [Coming Soon](https://github.com/uzumaki-ak/family-vault)
+🔗 [Coming Soon](https://youtu.be/lIwSNZrEWqc)
 
 ---
 
